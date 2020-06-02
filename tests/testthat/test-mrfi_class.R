@@ -1,7 +1,8 @@
 test_that("mrfi plotting works", {
   expect_is(mrfi(), "mrfi")
   expect_is(plot(mrfi()), "ggplot")
-  expect_is(plot(mrfi(), no_axis = TRUE), "ggplot")
+  expect_is(plot(mrfi(), include_axis = TRUE), "ggplot")
+  expect_is(plot(mrfi(), include_opposite = FALSE), "ggplot")
 })
 
 test_that("mrfi creation works", {
@@ -17,6 +18,8 @@ test_that("mrfi subsetting and conversion", {
   expect_error(mrfi(1)[[3]])
   expect_identical(mrfi(1), mrfi(1)[1:2])
   expect_identical(as.list(mrfi(1)), mrfi(1)[[1:2]])
+
+  expect_equal(length(mrfi(1)), 2)
 })
 
 test_that("mrfi + and - operators work", {

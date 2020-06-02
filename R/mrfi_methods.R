@@ -11,8 +11,10 @@
 #'  package and add more `ggplot` layers to freely customize the `plot`.
 #'
 #' @param x A \code{\link[=mrfi-class]{mrfi}} object.
-#' @param no_axis `logical` value indicating whether the axis and grid lines
-#'  are used. If `TRUE` it simply adds `theme_void()` to the `ggplot` object.
+#' @param include_axis `logical` indicating whether the axis and grid lines
+#'  are included. If `FALSE` `theme_void()` is added to the `ggplot` object.
+#' @param include_opposite ´logical` whether opposite directions should be
+#'  included in the visualization of the dependence structure.
 #'
 #' @return A `ggplot` object using `geom_tile()` to represent interacting
 #' relative positions.
@@ -31,24 +33,23 @@
 #'
 #' @exportMethod plot
 setMethod("plot", signature(x = "mrfi", y = "missing"),
-          definition = function(x, no_axis = FALSE){
+          definition = function(x, include_axis = FALSE,
+                                include_opposite = TRUE){
             df <- as.data.frame(x@Rmat)
             names(df) <- c("rx", "ry")
-            df2 <- df
-            df2$rx <- -df$rx
-            df2$ry <- -df$ry
-            df <- rbind(df,df2)
-
             df_center <- data.frame(rx = 0, ry = 0)
 
             max_norm <- max(5, max(df$rx), max(df$ry)) + 0.5
             p <- ggplot(df, aes_string(x = "rx", y = "ry")) +
               geom_tile(fill = "gray", color = "black") +
               geom_tile(data = df_center, fill = "black") +
-              theme_minimal() +
-              lims(x = c(-max_norm, max_norm), y = c(-max_norm, max_norm))
-            if(no_axis) {p <- p + theme_void()}
-            p
+              theme_minimal()
+            if(include_opposite){p <- p +
+              geom_tile(data = data.frame(rx = -df$rx, ry = -df$ry),
+                        linetype = "dashed", color = "gray55",
+                        fill = "gray95")}
+            if(!include_axis) {p <- p + theme_void()}
+            p + lims(x = c(-max_norm, max_norm), y = c(-max_norm, max_norm))
           })
 
 #' @rdname mrfi-class
@@ -62,6 +63,13 @@ setMethod("plot", signature(x = "mrfi", y = "missing"),
 setMethod("as.list", signature(x = "mrfi"),
           definition = function(x){
             unname(split(x@Rmat, rep(1:nrow(x@Rmat), ncol(x@Rmat))))
+          })
+
+#' @rdname mrfi-subsetting
+#' @exportMethod length
+setMethod("length", signature(x = "mrfi"),
+          definition = function(x){
+            nrow(x@Rmat)
           })
 
 #' @rdname mrfi-subsetting
@@ -129,7 +137,7 @@ setMethod("+", signature = c("mrfi", "numeric"),
               stop("Right hand side must be a vector with two integer values.")
             } else if(any(sapply(as.list(e1), function(pos){
               all(pos == e2) | all(pos == (-e2))}
-              ))){
+              )) & length(e1) > 0){
                 return(e1)
             }
             result <- mrfi_union(e1, list(e2))
@@ -147,6 +155,7 @@ setMethod("-", signature = c("mrfi", "numeric"),
             } else if (any(as.integer(e2) != e2)){
               stop("Right hand side must be a vector of two integers.")
             } else {
+              if(length(e1) == 0) return(e1)
               e2 <- as.integer(e2)
               return(mrfi_diff(e1, list(e2, -e2)))
             }
@@ -167,5 +176,6 @@ setMethod("+", signature = c("mrfi", "mrfi"),
 #' mrfi(2) - mrfi(1)
 setMethod("-", signature = c("mrfi", "mrfi"),
           definition = function(e1, e2){
+            if(length(e1) == 0) return(e1)
             return(mrfi_diff(e1,e2))
           })

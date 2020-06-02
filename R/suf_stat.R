@@ -43,6 +43,9 @@ suf_stat <- function(arr, family){
 #'
 #' @description Computes the summary count statistics of a field given an
 #' interaction structure and a restriction family.
+#'   * `cohist()` computes the co-ocurrence histogram.
+#'   * `smr_stat()` computes the co-ocurrence histogram, then converts it into
+#'   a vector of sufficient statistics given a \code{\link[=mrf2d-family]{family}} of restrictions.
 #'
 #' @details The order the summarized counts appear in the summary vector matches
 #' the order in \code{\link[=smr_array]{smr_array()}}.
@@ -55,6 +58,11 @@ suf_stat <- function(arr, family){
 #' smr_stat(Z_potts, mrfi(1), "onepar")
 #' smr_stat(Z_potts, mrfi(1), "oneeach")
 #'
+#' @seealso
+#'
+#' A paper with detailed description of the package can be found at
+#' \url{https://arxiv.org/abs/2006.00383}
+#'
 #' @export
 smr_stat <- function(Z, mrfi, family){
   C <- max(Z)
@@ -62,25 +70,71 @@ smr_stat <- function(Z, mrfi, family){
   return(suf_stat(smr_array, family))
 }
 
+#' @rdname smr_stat
+#'
+#' @return An array representing the co-ocurrence histogram of `Z` in the relative
+#' positions contained in `mrfi`. Each row and column corresponds a pair of values
+#' in `(0, ..., C)` and each slice corresponds to
+#'
+#' @examples
+#' cohist(Z_potts, mrfi(1))
+#'
+#' @export
+cohist <- function(Z, mrfi){
+  C <- max(Z)
+  coh <- table_relative_3d(Z, mrfi@Rmat, C)
+  pos_names <- sapply(as.list(mrfi), paste, collapse = ",")
+  dimnames(coh) <- list(0:C, 0:C, paste0("(", pos_names, ")"))
+  return(coh)
+}
+
 #' @name smr_array
 #' @author Victor Freguglia
 #' @title Summarized representation of theta arrays
 #'
-#' @description Creates a vector with only the free parameters from an array.
+#' @description `smr_array` creates a vector containing only the free parameters from an array
+#' given a restriction \code{\link[=mrf2d-family]{family}}. `exapand_array` is the reverse
+#' operation, expanding a complete array from the vector of sufficient statistics.
 #'
 #' @inheritParams fit_pl
 #' @inheritParams rmrf2d
 #'
-#' @details The order the parameters appear in the vector matches
+#' @details The order the parameters appear in the summarized vector matches
 #' the order in \code{\link[=smr_stat]{smr_stat()}}.
 #'
-#' @return A numeric vector with the free parameters of `theta`.
+#' @return `smr_array` returns a numeric vector with the free parameters of `theta`.
 #'
 #' @examples
 #' smr_array(theta_potts, "onepar")
 #' smr_array(theta_potts, "oneeach")
 #'
+#' @seealso
+#'
+#' A paper with detailed description of the package can be found at
+#' \url{https://arxiv.org/abs/2006.00383}
+#'
 #' @export
 smr_array <- function(theta, family){
   array_to_vec(theta, family)
+}
+
+#' @rdname smr_array
+#'
+#' @param theta_vec A `numeric` vector with the free parameters of a potential
+#' array. It's dimension depends on the restriction `family`, `C` and the number
+#' of interacting positions on `mrfi`.
+#' @param C The maximum value of the field.
+#'
+#' @return `expand_array` returns a three-dimensional `array` of potentials.
+#'
+#' @examples
+#' expand_array(0.99, family = "onepar", mrfi = mrfi(1), C = 2)
+#' expand_array(c(0.1, 0.2), family = "oneeach", mrfi = mrfi(1), C = 3)
+#'
+#' @export
+expand_array <- function(theta_vec, family, mrfi, C){
+  theta <- vec_to_array(theta_vec, family, C, nrow(mrfi@Rmat))
+  pos_names <- sapply(as.list(mrfi), paste, collapse = ",")
+  dimnames(theta) <- list(0:C, 0:C, paste0("(", pos_names, ")"))
+  return(theta)
 }

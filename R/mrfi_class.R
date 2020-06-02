@@ -1,3 +1,18 @@
+mrfi_is_valid <- function(object){
+  errors <- character()
+  Rmat <- object@Rmat
+  if(ncol(Rmat) != 2){
+    msg <- "'Rmat' slot must be a matrix with 2 columns"
+    errors <- c(errors, msg)
+  }
+
+  if(any(as.integer(Rmat) != Rmat)){
+    msg <- "'Rmat' rows must be integers representing relative positions"
+  }
+
+  if(length(errors) == 0) TRUE else errors
+}
+
 #' @name mrfi-class
 #' @title mrfi: MRF interaction structure
 #' @description  The `mrfi` S4 class is a representation of the interaction
@@ -44,9 +59,15 @@
 #' mrfi(1)[[1]]
 #' mrfi(2)[[1:3]]
 #'
+#' @seealso
+#'
+#' A paper with detailed description of the package can be found at
+#' \url{https://arxiv.org/abs/2006.00383}
+#'
 #' @exportClass mrfi
 setClass("mrfi",
-         representation(Rmat = "matrix"))
+         representation(Rmat = "matrix"),
+         validity = mrfi_is_valid)
 
 setMethod("show", "mrfi",
           function(object){
@@ -58,6 +79,7 @@ setMethod("show", "mrfi",
             if(nrow(object@Rmat) > 5) {
               cat("  ... and", (nrow(object@Rmat)-5), "more.")
             }
+            cat("\n")
           })
 
 
@@ -96,6 +118,12 @@ setMethod("show", "mrfi",
 #' mrfi(1, positions = list(c(1,0), c(2,0)))
 #'
 #' @importFrom methods new
+#'
+#' @seealso
+#'
+#' A paper with detailed description of the package can be found at
+#' \url{https://arxiv.org/abs/2006.00383}
+#'
 #' @export
 mrfi <- function(max_norm = 1, norm_type = "1", positions = NULL){
   if(max_norm < 0){stop("'max_norm' must be greater than or equal 0.")}
@@ -143,3 +171,8 @@ mrfi <- function(max_norm = 1, norm_type = "1", positions = NULL){
   df <- unique(df)
   new("mrfi", Rmat = df)
 }
+
+mrfi_to_char <- function(mrfi){
+  sapply(as.list(mrfi), function(x) paste0("(", paste0(x, collapse = ","), ")"))
+}
+

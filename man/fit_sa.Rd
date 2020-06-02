@@ -12,7 +12,8 @@ fit_sa(
   init = 0,
   cycles = 5,
   refresh_each = length(gamma_seq) + 1,
-  refresh_cycles = 60
+  refresh_cycles = 60,
+  verbose = interactive()
 )
 }
 \arguments{
@@ -45,6 +46,9 @@ refresh happens).}
 
 \item{refresh_cycles}{An iteger indicating how many Gibbs Sampler cycles are
 performed when a refresh happens. Larger is usually better, but slower.}
+
+\item{verbose}{\code{logical} indicating whether the iteration number is printed
+during execution.}
 }
 \value{
 A \code{list} object with the following elements:
@@ -109,6 +113,10 @@ fit_sa(Z_potts, mrfi(1), family = "oneeach", gamma_seq = seq(1, 0, length.out = 
 \insertRef{wiki_sa}{mrf2d}
 
 \insertAllCited{}
+}
+\seealso{
+A paper with detailed description of the package can be found at
+\url{https://arxiv.org/abs/2006.00383}
 }
 \author{
 Victor Freguglia

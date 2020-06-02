@@ -20,6 +20,8 @@
 #' refresh happens).
 #' @param refresh_cycles An iteger indicating how many Gibbs Sampler cycles are
 #' performed when a refresh happens. Larger is usually better, but slower.
+#' @param verbose `logical` indicating whether the iteration number is printed
+#' during execution.
 #'
 #' @return A `list` object with the following elements:
 #'  * `theta`: The estimated `array` of potentials.
@@ -74,9 +76,15 @@
 #' fit_sa(Z_potts, mrfi(1), family = "oneeach", gamma_seq = seq(1, 0, length.out = 50))
 #' }
 #'
+#' @seealso
+#'
+#' A paper with detailed description of the package can be found at
+#' \url{https://arxiv.org/abs/2006.00383}
+#'
 #' @export
 fit_sa <- function(Z, mrfi, family = "onepar", gamma_seq, init = 0, cycles = 5,
-                   refresh_each = length(gamma_seq)+1, refresh_cycles = 60){
+                   refresh_each = length(gamma_seq)+1, refresh_cycles = 60,
+                   verbose = interactive()){
 
   if(!family %in% mrf2d_families){
     stop("'", family, "' is not an implemented family.")
@@ -117,6 +125,7 @@ fit_sa <- function(Z, mrfi, family = "onepar", gamma_seq, init = 0, cycles = 5,
   }
   # Iterate
   for(t in seq_along(gamma_seq)){
+    if(verbose) cat("\r Iteration:", t)
     arr_Z_t <- table_relative_3d(Z_t, mrfi@Rmat, C)
     S_t <- suf_stat(arr_Z_t, family)
     theta_t <- theta_t - gamma_seq[t]*(S_t - S)
@@ -133,6 +142,9 @@ fit_sa <- function(Z, mrfi, family = "onepar", gamma_seq, init = 0, cycles = 5,
     }
     d[t] <- sqrt(sum((S_t - S)^2))
   }
-  return(list(theta = vec_to_array(theta_t, family, C, n_R),
+  if(verbose) cat("\n")
+  theta_out <- vec_to_array(theta_t, family, C, n_R)
+  dimnames(theta_out)[[3]] <- mrfi_to_char(mrfi)
+  return(list(theta = theta_out,
               metrics = data.frame(t = seq_along(gamma_seq), distance = d)))
 }

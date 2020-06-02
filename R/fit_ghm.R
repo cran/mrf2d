@@ -6,8 +6,9 @@
 #' driven by a Markov random field with known parameters. The inclusion of a
 #' linear combination of basis functions as a fixed effect is also possible.
 #'
-#' The algorithm is an implementation of
-#' \insertCite{zhang2001segmentation}{mrf2d}.
+#' The algorithm is a modification of of
+#' \insertCite{zhang2001segmentation}{mrf2d}, which is
+#' described in \insertCite{freguglia2020hidden}{mrf2d}.
 #'
 #'
 #' @param Y A matrix of observed (continuous) pixel values.
@@ -70,13 +71,19 @@
 #' }
 #'
 #' @importFrom stats lm predict
+#'
+#' @seealso
+#'
+#' A paper with detailed description of the package can be found at
+#' \url{https://arxiv.org/abs/2006.00383}
+#'
 #' @export
 fit_ghm <- function(Y, mrfi, theta, fixed_fn = list(),
-                    equal_vars = TRUE,
+                    equal_vars = FALSE,
                     init_mus = NULL,
                     init_sigmas = NULL,
                     maxiter = 100, max_dist = 10^-3,
-                    icm_cycles = 6, verbose = TRUE, qr = NULL){
+                    icm_cycles = 6, verbose = interactive(), qr = NULL){
 
   Rmat <- mrfi@Rmat
 

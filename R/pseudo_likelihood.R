@@ -18,15 +18,17 @@
 #' @return A `numeric` with the pseudo-likelihood value.
 #'
 #' @details The pseudo-likelihood function is defined as the product of
-#' conditional distributions:
+#' conditional probabilities of each pixel given its neighbors:
 #'
 #' \deqn{\prod_i P(Z_i | Z_{{N}_i}, \theta).}
 #'
-#' For more details see the guide vignette:
-#' \code{vignette("guide", package = "mrf2d")}
-#'
 #' @examples
 #' pl_mrf2d(Z_potts, mrfi(1), theta_potts)
+#'
+#' @seealso
+#'
+#' A paper with detailed description of the package can be found at
+#' \url{https://arxiv.org/abs/2006.00383}
 #'
 #' @export
 pl_mrf2d <- function(Z, mrfi, theta, log_scale = TRUE){
@@ -92,6 +94,11 @@ pl_sub <- function(Z, mrfi, theta, log_scale){
 #' fit_pl(Z_potts, mrfi(1), family = "oneeach")
 #' fit_pl(Z_potts, mrfi(2), family = "onepar")
 #'
+#' @seealso
+#'
+#' A paper with detailed description of the package can be found at
+#' \url{https://arxiv.org/abs/2006.00383}
+#'
 #' @importFrom stats optim
 #' @export
 fit_pl <- function(Z, mrfi, family = "onepar", init = 0,
@@ -128,7 +135,9 @@ fit_pl <- function(Z, mrfi, family = "onepar", init = 0,
                              fn = pl_value,
                              control = list(fnscale = -1)),
                         optim_args))
-  out <- list(theta = vec_to_array(o$par, family, C, n_R),
+  theta_out = vec_to_array(o$par, family, C, n_R)
+  dimnames(theta_out)[[3]] <- mrfi_to_char(mrfi)
+  out <- list(theta = theta_out,
               value = o$value)
   if(return_optim) {out <- c(out, opt = o)}
   return(out)
