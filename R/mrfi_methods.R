@@ -15,6 +15,7 @@
 #'  are included. If `FALSE` `theme_void()` is added to the `ggplot` object.
 #' @param include_opposite ´logical` whether opposite directions should be
 #'  included in the visualization of the dependence structure.
+#' @param ... other arguments not used by this method.
 #'
 #' @return A `ggplot` object using `geom_tile()` to represent interacting
 #' relative positions.
@@ -31,52 +32,49 @@
 #'
 #' plot(mrfi(1)) + geom_text(aes(label = paste0("(",rx,",",ry,")")))
 #'
-#' @exportMethod plot
-setMethod("plot", signature(x = "mrfi", y = "missing"),
-          definition = function(x, include_axis = FALSE,
-                                include_opposite = TRUE){
-            df <- as.data.frame(x@Rmat)
-            names(df) <- c("rx", "ry")
-            df_center <- data.frame(rx = 0, ry = 0)
+#' @export
+plot.mrfi <- function(x, include_axis = FALSE,
+                      include_opposite = TRUE,
+                      ...){
+  df <- as.data.frame(x@Rmat)
+  names(df) <- c("rx", "ry")
+  df_center <- data.frame(rx = 0, ry = 0)
 
-            max_norm <- max(5, max(df$rx), max(df$ry)) + 0.5
-            p <- ggplot(df, aes_string(x = "rx", y = "ry")) +
-              geom_tile(fill = "gray", color = "black") +
-              geom_tile(data = df_center, fill = "black") +
-              theme_minimal()
-            if(include_opposite){p <- p +
-              geom_tile(data = data.frame(rx = -df$rx, ry = -df$ry),
-                        linetype = "dashed", color = "gray55",
-                        fill = "gray95")}
-            if(!include_axis) {p <- p + theme_void()}
-            p + lims(x = c(-max_norm, max_norm), y = c(-max_norm, max_norm))
-          })
+  max_norm <- max(5, max(df$rx), max(df$ry)) + 0.5
+  p <- ggplot(df, aes_string(x = "rx", y = "ry")) +
+    geom_tile(fill = "gray", color = "black") +
+    geom_tile(data = df_center, fill = "black") +
+    theme_minimal()
+  if(include_opposite){p <- p +
+    geom_tile(data = data.frame(rx = -df$rx, ry = -df$ry),
+              linetype = "dashed", color = "gray55",
+              fill = "gray95")}
+  if(!include_axis) {p <- p + theme_void()}
+  p + lims(x = c(-max_norm, max_norm), y = c(-max_norm, max_norm))
+}
 
 #' @rdname mrfi-class
 #'
 #' @param x `mrfi` object.
+#' @param ... other arguments not used by this method.
 #'
 #' @return `as.list()`: converts the `mrfi` object to a list of interacting
 #' positions (list of length-2 vectors).
 #'
-#' @exportMethod as.list
-setMethod("as.list", signature(x = "mrfi"),
-          definition = function(x){
-            unname(split(x@Rmat, rep(1:nrow(x@Rmat), ncol(x@Rmat))))
-          })
+#' @export
+as.list.mrfi <- function(x, ...){
+  unname(split(x@Rmat, rep(1:nrow(x@Rmat), ncol(x@Rmat))))
+}
 
-#' @rdname mrfi-subsetting
+#' @rdname mrfi-class
 #' @exportMethod length
 setMethod("length", signature(x = "mrfi"),
           definition = function(x){
             nrow(x@Rmat)
           })
 
-#' @rdname mrfi-subsetting
+#' @rdname mrfi-class
 #'
-#' @title Subsetting `mrfi` objects
-#'
-#' @param x `mrfi` object.
 #' @param i vector of indexes to extract interacting positions.
 #'
 #' @return `[[`: converts to list and subsets it.
@@ -92,7 +90,7 @@ setMethod("[[", signature = c("mrfi", "numeric", "missing"),
             unname(split(m, rep(1:nrow(m), ncol(m))))
           })
 
-#' @rdname mrfi-subsetting
+#' @rdname mrfi-class
 setMethod("[", signature = c("mrfi", "numeric", "missing"),
           definition = function(x, i){
             m <- x@Rmat[i,,drop = FALSE]
@@ -109,18 +107,16 @@ mrfi_diff <- function(mrfi1, mrfi2){
                         c(as.list(mrfi2), lapply(as.list(mrfi2), '*', -1L)))))
 }
 
-#' @rdname mrfi-operations
+#' @rdname mrfi-class
 #'
-#' @title Set operations for `mrfi` objects
-#'
-#' @description Provides simple operations to include (in the sense of union)
+#' @description Simple operations are provided to include (set union)
 #' new interacting positions to a `mrfi` object with the `'+'` operator and
 #' remove positions (set difference) with `-`. Individual positions can be
 #' included/excluded using length-2 vectors in the right hand side. Union and
 #' set difference of complete structures can also be computed by adding or
 #' subtracting two `mrfi` objects.
 #'
-#' This operations deal with opposite directions filtering to avoid redundancy
+#' These operations deal with opposite directions filtering to avoid redundancy
 #' in the interaction structure.
 #'
 #' @param e1 A `mrfi` object.
@@ -144,7 +140,7 @@ setMethod("+", signature = c("mrfi", "numeric"),
             return(result)
           })
 
-#' @rdname mrfi-operations
+#' @rdname mrfi-class
 #'
 #' @examples
 #' mrfi(1) - c(1,0)
@@ -161,7 +157,7 @@ setMethod("-", signature = c("mrfi", "numeric"),
             }
           })
 
-#' @rdname mrfi-operations
+#' @rdname mrfi-class
 #'
 #' @examples
 #' mrfi(1) + mrfi(0, positions = list(c(2,0)))
@@ -170,7 +166,7 @@ setMethod("+", signature = c("mrfi", "mrfi"),
             return(mrfi_union(e1,e2))
           })
 
-#' @rdname mrfi-operations
+#' @rdname mrfi-class
 #'
 #' @examples
 #' mrfi(2) - mrfi(1)

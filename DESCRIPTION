@@ -1,7 +1,7 @@
 Package: mrf2d
 Type: Package
 Title: Markov Random Field Models for Image Analysis
-Version: 0.3
+Version: 0.4.0
 Authors@R: 
     person("Victor", "Freguglia", email = "victorfreguglia@gmail.com",
              role = c("aut", "cre"), 
@@ -16,19 +16,19 @@ Description: Model fitting, sampling and visualization
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Imports: Rcpp (>= 1.0.1), dplyr(>= 0.8.1), reshape2, methods, ggplot2,
-        Rdpack
+Imports: Rcpp (>= 1.0.1), dplyr(>= 0.8.1), reshape2, tidyr, methods,
+        ggplot2, Rdpack
 Depends: R (>= 3.5.0)
 LinkingTo: Rcpp, RcppArmadillo
 RdMacros: Rdpack
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Suggests: testthat (>= 2.1.0), covr, knitr, rmarkdown, glue
 VignetteBuilder: knitr
 URL: https://github.com/Freguglia/mrf2d,
         https://arxiv.org/abs/2006.00383
 BugReports: https://github.com/Freguglia/mrf2d/issues
 NeedsCompilation: yes
-Packaged: 2020-06-02 19:11:55 UTC; victo
+Packaged: 2020-06-30 20:20:09 UTC; victor
 Author: Victor Freguglia [aut, cre] (<https://orcid.org/0000-0002-6189-4453>)
 Repository: CRAN
-Date/Publication: 2020-06-02 23:10:02 UTC
+Date/Publication: 2020-06-30 21:40:03 UTC

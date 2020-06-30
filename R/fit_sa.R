@@ -1,6 +1,6 @@
 #' @name fit_sa
 #' @author Victor Freguglia
-#' @title Stochastic Approximation algorithm for MRFs on 2d lattices
+#' @title Stochastic Approximation fitting of MRFs on 2d lattices
 #'
 #' @description Estimates the parameters of a MRF by successively sampling from
 #'  a parameter configuration and updating it by comparing the sufficient statistics
@@ -18,13 +18,16 @@
 #' complete refresh (restart from a random state). This prevents the sample from
 #' being stuck in a mode for too long. Defaults to `length(gamma_seq) + 1` (no
 #' refresh happens).
-#' @param refresh_cycles An iteger indicating how many Gibbs Sampler cycles are
+#' @param refresh_cycles An integer indicating how many Gibbs Sampler cycles are
 #' performed when a refresh happens. Larger is usually better, but slower.
 #' @param verbose `logical` indicating whether the iteration number is printed
 #' during execution.
 #'
-#' @return A `list` object with the following elements:
+#' @return A `mrfout` object with the following elements:
 #'  * `theta`: The estimated `array` of potentials.
+#'  * `mrfi`: The interaction structure considered.
+#'  * `family`: The parameter restriction family considered.
+#'  * `method`: The estimation method (`"Stochastic Approximation"`).
 #'  * `metrics`: A `data.frame` containing the the euclidean distance between
 #'  the sufficient statics computed for `Z` and the current sample.
 #'
@@ -67,11 +70,11 @@
 #' @examples
 #' \donttest{
 #' set.seed(2)
-#' fit1 <- fit_sa(Z_potts, mrfi(1), family = "onepar", gamma_seq = seq(1, 0, length.out = 50))
+#' fit1 <- fit_sa(Z_potts, mrfi(1), family = "oneeach", gamma_seq = seq(1, 0, length.out = 50))
 #' # Estimated parameters
 #' fit1$theta
 #' # A visualization of estimated gradient norm over iterations.
-#' plot(fit1$metrics)
+#' plot(fit1$metrics, type = "l")
 #'
 #' fit_sa(Z_potts, mrfi(1), family = "oneeach", gamma_seq = seq(1, 0, length.out = 50))
 #' }
@@ -125,7 +128,7 @@ fit_sa <- function(Z, mrfi, family = "onepar", gamma_seq, init = 0, cycles = 5,
   }
   # Iterate
   for(t in seq_along(gamma_seq)){
-    if(verbose) cat("\r Iteration:", t)
+    cat(ifelse(verbose, paste("\r Iteration:", t), ""))
     arr_Z_t <- table_relative_3d(Z_t, mrfi@Rmat, C)
     S_t <- suf_stat(arr_Z_t, family)
     theta_t <- theta_t - gamma_seq[t]*(S_t - S)
@@ -142,9 +145,16 @@ fit_sa <- function(Z, mrfi, family = "onepar", gamma_seq, init = 0, cycles = 5,
     }
     d[t] <- sqrt(sum((S_t - S)^2))
   }
-  if(verbose) cat("\n")
+  cat(ifelse(verbose, "\n", ""))
   theta_out <- vec_to_array(theta_t, family, C, n_R)
   dimnames(theta_out)[[3]] <- mrfi_to_char(mrfi)
-  return(list(theta = theta_out,
-              metrics = data.frame(t = seq_along(gamma_seq), distance = d)))
+  out <- list(theta = theta_out,
+              mrfi = mrfi,
+              family = family,
+              method = "Stochastic Approximation",
+              metrics = data.frame(t = seq_along(gamma_seq), distance = d),
+              Z = Z,
+              ncycles = length(gamma_seq))
+  class(out) <- "mrfout"
+  return(out)
 }

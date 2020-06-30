@@ -30,7 +30,7 @@
 #' @param verbose `logical` indicating wheter to print the progress or not.
 #' @param qr The QR decomposition of the design matrix. Used internally.
 #'
-#' @return A `list` containing:
+#' @return A `hmrfout` containing:
 #'  * `par`: A `data.frame` with \eqn{\mu} and \eqn{\sigma} estimates for each
 #' component.
 #'  * `fixed`: A `matrix` with the estimated fixed effect in each pixel.
@@ -118,8 +118,8 @@ fit_ghm <- function(Y, mrfi, theta, fixed_fn = list(),
   # Initialize variables
   if(is.null(init_mus) | is.null(init_sigmas)) {
     mus_old <- seq(min(e, na.rm = TRUE), max(e, na.rm = TRUE), length.out = C+1)
-    if(verbose)
-      cat("\r Fitting independent mixture to obtain initial parameters. \n")
+    cat(
+      ifelse(verbose,"\r Fitting independent mixture to obtain initial parameters. \n",""))
     ind_fit <- fit_ghm(e, mrfi, theta*0, fixed_fn = fixed_fn, equal_vars,
                        init_mus = seq(min(e, na.rm = TRUE), max(e, na.rm = TRUE),
                                       length.out = C+1),
@@ -203,19 +203,26 @@ fit_ghm <- function(Y, mrfi, theta, fixed_fn = list(),
                   abs(sigmas_old - sigmas_new)))
 
     iter <- iter + 1
-    if(verbose) {cat("\r EM iteration:", iter)}
+    cat(ifelse(verbose, paste("\r EM iteration:", iter), ""))
     mus_old <- mus_new
     sigmas_old <- sigmas_new
   }
 
-  if(verbose) {cat("\r Finished with ",iter, "iterations. \n")}
+  cat(ifelse(verbose, paste("\r Finished with",iter, "iterations. \n"), ""))
 
   df_par <- data.frame(mu = mus_old, sigma = sigmas_old)
   rownames(df_par) = 0:C
 
-  return(list(par = df_par,
+  out <- list(par = df_par,
               fixed = S,
               Z_pred = Z,
+              mrfi = mrfi,
+              theta = theta,
               predicted = apply(Z, c(1,2), function(z) mus_old[z+1]) + S,
-              iterations = iter))
+              iterations = iter,
+              Y = Y,
+              C = C,
+              covs = fixed_fn)
+  class(out) <- "hmrfout"
+  return(out)
 }
