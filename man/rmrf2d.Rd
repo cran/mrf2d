@@ -26,8 +26,8 @@ interaction structure.}
 
 \item{theta}{A 3-dimensional array describing potentials. Slices represent
 interacting positions, rows represent pixel values and columns represent
-neighbor values. As an example: \code{theta[1,3,2]} has the potential pairs of
-values 0,2 in the second relative position of \code{mrfi}.}
+neighbor values. As an example: \code{theta[1,3,2]} has the potential for the
+pair of values 0,2 observed in the second relative position of \code{mrfi}.}
 
 \item{cycles}{The number of updates to be done (for each each pixel).}
 
@@ -115,7 +115,10 @@ dplot(Z5)
 }
 \seealso{
 A paper with detailed description of the package can be found at
-\url{https://arxiv.org/abs/2006.00383}
+\url{https://arxiv.org/abs/2006.00383}.
+
+\code{\link[=rmrf2d_mc]{rmrf2d_mc}} for generating multiple points of a
+Markov Chain to be used in Monte-Carlo methods.
 }
 \author{
 Victor Freguglia
