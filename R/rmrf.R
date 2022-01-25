@@ -87,7 +87,7 @@
 #' @seealso
 #'
 #' A paper with detailed description of the package can be found at
-#' \url{https://arxiv.org/abs/2006.00383}.
+#' \doi{10.18637/jss.v101.i08}.
 #'
 #' \code{\link[=rmrf2d_mc]{rmrf2d_mc}} for generating multiple points of a
 #' Markov Chain to be used in Monte-Carlo methods.
@@ -186,6 +186,7 @@ rmrf2d <- function(init_Z, mrfi, theta, cycles = 60, sub_region = NULL, fixed_re
 #' statistics.
 #' @param cycles Number of cycles between collected samples.
 #' @param nmc Number of samples to be stored.
+#' @param verbose `logical` indicating whether to print iteration number or not.
 #'
 #' @note Fixed regions and incomplete lattices are not supported.
 #'
@@ -197,7 +198,8 @@ rmrf2d <- function(init_Z, mrfi, theta, cycles = 60, sub_region = NULL, fixed_re
 #'
 #' @export
 rmrf2d_mc <- function(init_Z, mrfi, theta, family,
-                      nmc = 100, burnin = 100, cycles = 4){
+                      nmc = 100, burnin = 100, cycles = 4,
+                      verbose = interactive()){
 
   # Initialize samples and matrix to store results
   zt <- rmrf2d(init_Z, mrfi, theta, cycles = burnin)
@@ -209,7 +211,9 @@ rmrf2d_mc <- function(init_Z, mrfi, theta, family,
     zt <- rmrf2d(zt, mrfi, theta, cycles = cycles)
     # Store sufficient stastics
     M[i,] <- smr_stat(zt, mrfi, family)
+    if(verbose) cat("\r", i)
   }
+  if(verbose) cat("\r", "Done!", "\n")
 
   return(M)
 }

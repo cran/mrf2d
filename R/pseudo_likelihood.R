@@ -28,7 +28,7 @@
 #' @seealso
 #'
 #' A paper with detailed description of the package can be found at
-#' \url{https://arxiv.org/abs/2006.00383}
+#' \doi{10.18637/jss.v101.i08}.
 #'
 #' @export
 pl_mrf2d <- function(Z, mrfi, theta, log_scale = TRUE){
@@ -100,7 +100,7 @@ pl_sub <- function(Z, mrfi, theta, log_scale){
 #' @seealso
 #'
 #' A paper with detailed description of the package can be found at
-#' \url{https://arxiv.org/abs/2006.00383}
+#' \doi{10.18637/jss.v101.i08}.
 #'
 #' @importFrom stats optim
 #' @export
@@ -136,7 +136,8 @@ fit_pl <- function(Z, mrfi, family = "onepar", init = 0,
   }
   o <- do.call(optim, c(list(par = init,
                              fn = pl_value,
-                             control = list(fnscale = -1)),
+                             control = list(fnscale = -1),
+                             hessian = return_optim),
                         optim_args))
   theta_out = vec_to_array(o$par, family, C, n_R)
   dimnames(theta_out)[[3]] <- mrfi_to_char(mrfi)
@@ -148,5 +149,16 @@ fit_pl <- function(Z, mrfi, family = "onepar", init = 0,
               Z = Z)
   if(return_optim) {out <- c(out, opt = o)}
   class(out) <- "mrfout"
+  return(out)
+}
+
+# Gradient for Pseudolikelihood under 'free' family
+grad_pl_free_nosub <- function(theta_vec, z, mrfi){
+  ns <- cohist(z, mrfi)
+  C <- dim(ns)[2] - 1
+  theta_arr <- expand_array(theta_vec, "free", mrfi, C)
+  wprob <- gradient_crossed_free(z, mrfi@Rmat, theta_arr)
+  out <- 2*ns - wprob
+  out[1,1,] <- 0
   return(out)
 }

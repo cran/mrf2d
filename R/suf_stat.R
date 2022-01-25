@@ -32,6 +32,11 @@ suf_stat <- function(arr, family){
       return(as.vector(m)[-1])
     }))
 
+  } else if(family == "symmetric"){
+    as.vector(apply(arr, MARGIN = 3, function(m){
+      (t(m)+(m*lower.tri(m)))[lower.tri(m, diag = TRUE)][-1]
+    }))
+
   } else {
     stop("'", family, "' is not an implemented family.")
   }
@@ -61,11 +66,11 @@ suf_stat <- function(arr, family){
 #' @seealso
 #'
 #' A paper with detailed description of the package can be found at
-#' \url{https://arxiv.org/abs/2006.00383}
+#' \doi{10.18637/jss.v101.i08}
 #'
 #' @export
 smr_stat <- function(Z, mrfi, family){
-  C <- max(Z, na.rm = TRUE)
+  C <- max(1, max(Z, na.rm = TRUE))
   smr_array <- table_relative_3d(Z, mrfi@Rmat, C)
   return(suf_stat(smr_array, family))
 }
@@ -102,6 +107,10 @@ cohist <- function(Z, mrfi){
 #' @details The order the parameters appear in the summarized vector matches
 #' the order in \code{\link[=smr_stat]{smr_stat()}}.
 #'
+#' \code{vec_description()} provides a \code{data.frame} object describing
+#' which are the relative positions and interactions associated with each
+#' element of the summarized vector in the same order.
+#'
 #' @return `smr_array` returns a numeric vector with the free parameters of `theta`.
 #'
 #' @examples
@@ -111,7 +120,7 @@ cohist <- function(Z, mrfi){
 #' @seealso
 #'
 #' A paper with detailed description of the package can be found at
-#' \url{https://arxiv.org/abs/2006.00383}
+#' \doi{10.18637/jss.v101.i08}
 #'
 #' @export
 smr_array <- function(theta, family){
@@ -138,3 +147,55 @@ expand_array <- function(theta_vec, family, mrfi, C){
   dimnames(theta) <- list(0:C, 0:C, paste0("(", pos_names, ")"))
   return(theta)
 }
+
+#' @rdname smr_stat
+#'
+#' @inheritParams expand_array
+#' @return A `data.frame` describing the relative position
+#'  and interaction associated with each potential in the vector
+#'  form in each row, in the same order.
+#'
+#' @export
+vec_description <- function(mrfi, family, C){
+    pos <- apply(mrfi@Rmat, MARGIN = 1, paste0, collapse = ",")
+    pos <- paste0("(", pos, ")")
+    if(family == "onepar"){
+        res <- data.frame(position = as.factor("all"),
+                          interaction = as.factor("different"))
+
+    } else if(family == "oneeach"){
+        res <- data.frame(position = as.factor(pos),
+                          interaction = as.factor("different"))
+
+    } else if(family == "absdif"){
+        ints <- paste0("abs.dif. ",1:C)
+        res <- data.frame(position = rep(pos, each = C),
+                          interaction = rep(ints, times = length(pos)))
+
+    } else if(family == "dif"){
+        ints <- paste0("dif. ", c(-C:-1,1:C))
+        res <- data.frame(position = rep(pos, each = 2*C),
+                          interaction = rep(ints, times = length(pos)))
+
+
+    } else if(family == "free"){
+        arr <- array(dim=c(C+1, C+1, length(pos)))
+        ints <- paste0(rep(0:C, times = C+1), ",", rep(0:C, each = C+1))
+        ints <- ints[ints != "0,0"]
+        res <- data.frame(position = rep(pos, each = (C+1)^2 - 1),
+                          interaction = rep(ints, times = length(pos)))
+
+    } else if(family == "symmetric"){
+        m <- matrix(nrow = C+1, ncol = C+1)
+        ints <- paste0(row(m)[lower.tri(m,TRUE)]-1, ",", col(m)[lower.tri(m, TRUE)]-1)
+        ints <- ints[ints != "0,0"]
+        res <- data.frame(position = rep(pos, each = (C+1)*(C+2)/2 - 1),
+                          interaction = rep(ints, times = length(pos)))
+
+
+    } else {
+        stop("'", family, "' is not an implemented family.")
+    }
+    return(res)
+}
+

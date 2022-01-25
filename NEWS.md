@@ -1,3 +1,15 @@
+# mrf2d 1.0
+
+  * Adds references to the manuscript published in the Journal of Statistical Software.
+
+# mrf2d 0.6
+
+  * Adds `symmetric` family for equality constraints of the potentials array.
+
+# mrf2d 0.5.1
+
+  * Added `vec_description()` function to explicitly describe what relative positions and interactions are associated with each element of the summarized vector of parameters/sufficient statistics in each parameter restriction family.
+
 # mrf2d 0.5
   * `rpositions()` can now be used as an alternative to create `mrfi` objects based on explicitly described relative positions with a simpler syntax than `mrfi()`.
   * Added a vignette on analyzing 3d data via 2d projections in `mrf2d`.
