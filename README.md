@@ -5,12 +5,11 @@
 
 <!-- badges: start -->
 
-[![Travis build
-status](https://travis-ci.org/Freguglia/mrf2d.svg?branch=master)](https://travis-ci.org/Freguglia/mrf2d)
-[![Codecov test
-coverage](https://codecov.io/gh/Freguglia/mrf2d/branch/master/graph/badge.svg)](https://app.codecov.io/gh/Freguglia/mrf2d?branch=master)
+[![R-CMD-check](https://github.com/Freguglia/mrf2d/actions/workflows/check-release.yaml/badge.svg)](https://github.com/Freguglia/mrf2d/actions/workflows/check-release.yaml)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/mrf2d)](https://cran.r-project.org/package=mrf2d)
+[![Codecov test
+coverage](https://codecov.io/gh/Freguglia/mrf2d/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Freguglia/mrf2d?branch=main)
 [![Lifecycle:
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
@@ -37,7 +36,7 @@ A complete paper describing the details of the package and examples is
 published in the Journal of Statistical Software and can be found
 [here](https://doi.org/10.18637/jss.v101.i08).
 
------
+------------------------------------------------------------------------
 
 ## Installation
 
@@ -56,7 +55,7 @@ page](https://github.com/Freguglia/mrf2d). It can be installed with the
 devtools::install_github("Freguglia/mrf2d")
 ```
 
------
+------------------------------------------------------------------------
 
 ## Usage
 
@@ -129,7 +128,7 @@ dplot(Z, legend = TRUE)
 
 <img src="man/figures/README-Z_example_plot-1.png" style="display: block; margin: auto;" />
 
------
+------------------------------------------------------------------------
 
 ## Contributing and Bug Reports
 
